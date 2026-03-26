@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <title>Career Nest - Professional Career Intelligence</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            heading: ['Plus Jakarta Sans', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb', // Microsoft/Google primary blue
+              700: '#1d4ed8',
+              900: '#1e3a8a',
+            },
+            slate: {
+              850: '#151f32', // Deep enterprise dark
+            }
+          },
+          boxShadow: {
+            'soft': '0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02)',
+            'card': '0 0 0 1px rgba(226, 232, 240, 1), 0 2px 4px rgba(0,0,0,0.02)',
+            'card-hover': '0 0 0 1px rgba(37, 99, 235, 0.2), 0 10px 30px -10px rgba(37, 99, 235, 0.15)',
+            'glow': '0 0 80px -20px rgba(37, 99, 235, 0.15)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* --------------------------------------
+       PREMIUM SAAS GLOBAL RESETS
+       -------------------------------------- */
+    body {
+      background-color: #F8FAFC; /* Slate-50 */
+      /* Subtle mesh gradient background */
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.03) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(37, 99, 235, 0.03) 0px, transparent 50%);
+      color: #0f172a; /* Slate-900 */
+      -webkit-font-smoothing: antialiased;
+    }
+
+    ::selection {
+      background-color: #dbeafe;
+      color: #1e40af;
+    }
+
+    /* --------------------------------------
+       UTILITIES & ANIMATIONS
+       -------------------------------------- */
+    .glass-nav {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+    }
+
+    .hero-text-gradient {
+      background: linear-gradient(135deg, #1e293b 0%, #3b82f6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Card styling - The "Stripe" or "Linear" look */
+    .feature-card {
+      background: #FFFFFF;
+      border-radius: 12px;
+      box-shadow: var(--card-shadow, 0 0 0 1px rgba(226, 232, 240, 1), 0 2px 4px rgba(0,0,0,0.02));
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card:hover {
+      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.3), 0 12px 24px -8px rgba(37, 99, 235, 0.1);
+      transform: translateY(-4px);
+    }
+
+    .feature-icon-wrapper {
+      transition: transform 0.3s ease;
+    }
+
+    .feature-card:hover .feature-icon-wrapper {
+      transform: scale(1.1);
+    }
+
+    /* Form Inputs */
+    .input-premium {
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      color: #1E293B;
+      transition: all 0.2s;
+    }
+
+    .input-premium:focus {
+      border-color: #3B82F6;
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+      outline: none;
+    }
+
+    /* Buttons */
+    .btn-saas-primary {
+      background: #2563EB;
+      color: white;
+      transition: all 0.2s;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1), 0 0 0 1px rgba(37, 99, 235, 1);
+    }
+    .btn-saas-primary:hover {
+      background: #1D4ED8;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .btn-saas-secondary {
+      background: white;
+      color: #1E293B;
+      border: 1px solid #E2E8F0;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    .btn-saas-secondary:hover {
+      background: #F8FAFC;
+      border-color: #CBD5E1;
+      color: #0F172A;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      background: rgba(15, 23, 42, 0.4); /* Slate-900 with opacity */
+      backdrop-filter: blur(8px);
+    }
+    
+    .fade-up {
+      animation: fadeUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .delay-100 { animation-delay: 0.1s; }
+    .delay-200 { animation-delay: 0.2s; }
+    .delay-300 { animation-delay: 0.3s; }
+
+  </style>
+</head>
+<body class="flex flex-col min-h-screen relative font-sans text-slate-600 antialiased selection:bg-brand-100 selection:text-brand-900">
+  
+  <header class="sticky top-0 z-40 w-full glass-nav">
+    <div class="max-w-7xl mx-auto flex justify-between items-center h-20 px-6 lg:px-8">
+        <div class="brand flex items-center gap-3 cursor-pointer" onclick="window.location.reload()">
+            <div class="w-10 h-10 bg-brand-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-brand-500/30">
+                <i class="fa-solid fa-layer-group text-lg"></i>
+            </div>
+            <div class="font-heading font-bold text-xl tracking-tight text-slate-900">Career Nest</div>
+        </div>
+        <div class="flex gap-4 items-center">
+            <button onclick="showAuth('login')" class="hidden md:inline-flex text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
+                Sign In
+            </button>
+            <button onclick="showAuth('signup')" class="py-2.5 px-6 rounded-full bg-slate-900 text-white font-semibold text-sm hover:bg-slate-800 transition-all shadow-md hover:shadow-lg">
+                Get Started
+            </button>
+        </div>
+    </div>
+  </header>
+
+  <main class="flex-grow w-full">
+    <div id="landingPage" class="relative pt-20 pb-32 overflow-hidden">
+      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full z-0 pointer-events-none">
+        <div class="absolute top-20 left-20 w-72 h-72 bg-brand-500/10 rounded-full blur-3xl mix-blend-multiply filter opacity-70 animate-blob"></div>
+        <div class="absolute top-20 right-20 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl mix-blend-multiply filter opacity-70 animate-blob animation-delay-2000"></div>
+      </div>
+
+      <div class="max-w-5xl mx-auto px-6 lg:px-8 text-center relative z-10">
+        
+        <div class="fade-up inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-slate-200 shadow-sm text-xs font-medium text-slate-600 mb-8 cursor-default">
+          <span class="flex h-2 w-2 relative">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-brand-500"></span>
+          </span>
+          New: AI-Powered Career Roadmap
+        </div>
+
+        <h1 class="fade-up delay-100 font-heading text-5xl md:text-7xl font-extrabold tracking-tight text-slate-900 mb-6 leading-[1.1]">
+          Your Career Journey, <br class="hidden md:block">
+          <span class="hero-text-gradient">Engineered by AI.</span>
+        </h1>
+        
+        <p class="fade-up delay-200 text-lg md:text-xl text-slate-500 mb-10 max-w-2xl mx-auto leading-relaxed">
+          The enterprise-grade platform to quantify your skills, optimize your resume, and map your professional future with real-time data.
+        </p>
+        
+        <div class="fade-up delay-300 flex flex-col sm:flex-row justify-center gap-4 mb-24">
+          <button onclick="showAuth('signup')" class="btn-saas-primary py-4 px-8 rounded-full text-base font-semibold shadow-lg shadow-brand-500/20">
+            Start Your Journey
+            <i class="fas fa-arrow-right ml-2 text-sm"></i>
+          </button>
+          <button onclick="showAuth('login')" class="btn-saas-secondary py-4 px-8 rounded-full text-base font-semibold">
+            View Demo
+          </button>
+        </div>
+
+        <div class="fade-up delay-300 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-left relative">
+          
+          <div class="feature-card p-8 group">
+            <div class="feature-icon-wrapper w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center mb-6 text-orange-600 group-hover:bg-orange-600 group-hover:text-white transition-colors">
+              <i class="fas fa-bullseye text-xl"></i>
+            </div>
+            <h3 class="font-heading text-lg font-bold text-slate-900 mb-3">ATS Resume Scorer</h3>
+            <p class="text-sm text-slate-500 leading-relaxed">Instantly check resume compatibility, optimize keywords, and pass automated screeners with precision scoring.</p>
+          </div>
+          
+          <div class="feature-card p-8 group">
+            <div class="feature-icon-wrapper w-12 h-12 bg-brand-50 rounded-xl flex items-center justify-center mb-6 text-brand-600 group-hover:bg-brand-600 group-hover:text-white transition-colors">
+                <i class="fas fa-route text-xl"></i>
+            </div>
+            <h3 class="font-heading text-lg font-bold text-slate-900 mb-3">AI Career Coach</h3>
+            <p class="text-sm text-slate-500 leading-relaxed">Generate a personalized, actionable 3-phase roadmap to reach your target role based on your profile.</p>
+          </div>
+          
+          <div class="feature-card p-8 group">
+            <div class="feature-icon-wrapper w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center mb-6 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+              <i class="fas fa-clipboard-check text-xl"></i>
+            </div>
+            <h3 class="font-heading text-lg font-bold text-slate-900 mb-3">JD Matcher</h3>
+            <p class="text-sm text-slate-500 leading-relaxed">Paste any job description and receive an instant match score, quantifying your fit and specific skill gaps.</p>
+          </div>
+          
+          <div class="feature-card p-8 group">
+            <div class="feature-icon-wrapper w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center mb-6 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+              <i class="fas fa-file-alt text-xl"></i>
+            </div>
+            <h3 class="font-heading text-lg font-bold text-slate-900 mb-3">Visual Resume Builder</h3>
+            <p class="text-sm text-slate-500 leading-relaxed">Drag-and-drop sections, select modern templates, and export professional PDFs in one click.</p>
+          </div>
+
+          <div class="feature-card p-8 group">
+            <div class="feature-icon-wrapper w-12 h-12 bg-sky-50 rounded-xl flex items-center justify-center mb-6 text-sky-600 group-hover:bg-sky-600 group-hover:text-white transition-colors">
+              <i class="fas fa-tools text-xl"></i>
+            </div>
+            <h3 class="font-heading text-lg font-bold text-slate-900 mb-3">Skill Proficiency</h3>
+            <p class="text-sm text-slate-500 leading-relaxed">Log your expertise levels (0-100%) and watch your skill portfolio grow with intuitive visualizations.</p>
+          </div>
+          
+          <div class="feature-card p-8 group">
+            <div class="feature-icon-wrapper w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center mb-6 text-purple-600 group-hover:bg-purple-600 group-hover:text-white transition-colors">
+              <i class="fas fa-folder-open text-xl"></i>
+            </div>
+            <h3 class="font-heading text-lg font-bold text-slate-900 mb-3">Project Sync</h3>
+            <p class="text-sm text-slate-500 leading-relaxed">Centralize your projects, experience, and certifications. Never search for that GitHub link again.</p>
+          </div>
+          
+          <div class="feature-card p-8 group">
+            <div class="feature-icon-wrapper w-12 h-12 bg-yellow-50 rounded-xl flex items-center justify-center mb-6 text-yellow-600 group-hover:bg-yellow-600 group-hover:text-white transition-colors">
+              <i class="fas fa-medal text-xl"></i>
+            </div>
+            <h3 class="font-heading text-lg font-bold text-slate-900 mb-3">Gamified Growth</h3>
+            <p class="text-sm text-slate-500 leading-relaxed">Earn XP and unlock exclusive badges for milestones, maintaining streaks, and completing your profile.</p>
+          </div>
+          
+          <div class="feature-card p-8 group">
+            <div class="feature-icon-wrapper w-12 h-12 bg-violet-50 rounded-xl flex items-center justify-center mb-6 text-violet-600 group-hover:bg-violet-600 group-hover:text-white transition-colors">
+              <i class="fas fa-chart-line text-xl"></i>
+            </div>
+            <h3 class="font-heading text-lg font-bold text-slate-900 mb-3">Deep Analytics</h3>
+            <p class="text-sm text-slate-500 leading-relaxed">See your skill distribution by category, track progress over time, and measure growth against benchmarks.</p>
+          </div>
+          
+          <div class="feature-card p-8 group">
+            <div class="feature-icon-wrapper w-12 h-12 bg-rose-50 rounded-xl flex items-center justify-center mb-6 text-rose-600 group-hover:bg-rose-600 group-hover:text-white transition-colors">
+              <i class="fas fa-headset text-xl"></i>
+            </div>
+            <h3 class="font-heading text-lg font-bold text-slate-900 mb-3">Mock Interviews</h3>
+            <p class="text-sm text-slate-500 leading-relaxed">Simulate behavioral and technical interviews tailored to your target role and profile strength.</p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <footer class="bg-slate-900 text-slate-300 py-16 border-t border-slate-800">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-12 mb-12">
+            <div class="col-span-2 md:col-span-1">
+                <div class="flex items-center gap-2 mb-6 text-white">
+                    <i class="fa-solid fa-layer-group text-brand-500"></i>
+                    <span class="font-heading font-bold text-xl">Career Nest</span>
+                </div>
+                <p class="text-sm text-slate-400 leading-relaxed mb-6">Empowering professionals to build, track, and showcase their journey with AI precision.</p>
+                <div class="flex gap-4">
+                    <a href="#" class="text-slate-400 hover:text-white transition-colors"><i class="fab fa-linkedin text-lg"></i></a>
+                    <a href="#" class="text-slate-400 hover:text-white transition-colors"><i class="fab fa-github text-lg"></i></a>
+                    <a href="#" class="text-slate-400 hover:text-white transition-colors"><i class="fab fa-twitter text-lg"></i></a>
+                </div>
+            </div>
+            <div>
+                <h5 class="text-white font-semibold mb-4 text-sm tracking-wide uppercase">Platform</h5>
+                <ul class="space-y-3 text-sm">
+                    <li><a href="#" class="hover:text-brand-400 transition-colors">Features</a></li>
+                    <li><a href="#" class="hover:text-brand-400 transition-colors">Pricing</a></li>
+                    <li><a href="#" onclick="showAuth('login'); return false;" class="hover:text-brand-400 transition-colors">Sign In</a></li>
+                    <li><a href="#" onclick="showAuth('signup'); return false;" class="hover:text-brand-400 transition-colors">Get Started</a></li>
+                </ul>
+            </div>
+            <div>
+                <h5 class="text-white font-semibold mb-4 text-sm tracking-wide uppercase">Intelligence</h5>
+                <ul class="space-y-3 text-sm">
+                    <li><a href="#" class="hover:text-brand-400 transition-colors">Resume Scorer</a></li>
+                    <li><a href="#" class="hover:text-brand-400 transition-colors">Career Coach</a></li>
+                    <li><a href="#" class="hover:text-brand-400 transition-colors">JD Matcher</a></li>
+                    <li><a href="#" class="hover:text-brand-400 transition-colors">Market Analytics</a></li>
+                </ul>
+            </div>
+            <div>
+                <h5 class="text-white font-semibold mb-4 text-sm tracking-wide uppercase">Support</h5>
+                <ul class="space-y-3 text-sm">
+                    <li><a href="#" class="hover:text-brand-400 transition-colors">Help Center</a></li>
+                    <li><a href="#" class="hover:text-brand-400 transition-colors">Privacy Policy</a></li>
+                    <li><a href="#" class="hover:text-brand-400 transition-colors">Terms of Service</a></li>
+                    <li><a href="#" class="hover:text-brand-400 transition-colors">Contact Us</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="border-t border-slate-800 pt-8 text-center text-sm text-slate-500">
+            &copy; 2025 Career Nest Inc. All rights reserved.
+        </div>
+    </div>
+  </footer>
+
+  <div id="authModal" class="fixed inset-0 modal-backdrop flex items-center justify-center p-4 hidden z-50">
+    <div class="bg-white p-0 rounded-2xl w-full max-w-md shadow-2xl transform transition-all overflow-hidden border border-slate-200">
+      
+      <div id="loginForm" class="hidden">
+        <div class="p-8 pb-0">
+          <h2 class="font-heading text-2xl font-bold text-slate-900">Welcome back</h2>
+          <p class="text-slate-500 text-sm mt-1">Please enter your details to sign in.</p>
+        </div>
+        
+        <form id="loginFormElement" class="p-8 space-y-5">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-2">Email</label>
+            <div class="relative">
+              <i class="fas fa-envelope absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 text-sm"></i>
+              <input type="email" id="loginEmail" placeholder="name@company.com" 
+                     class="input-premium w-full pl-10 pr-4 py-3 rounded-lg text-sm font-medium" required>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-2">Password</label>
+            <div class="relative">
+              <i class="fas fa-lock absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 text-sm"></i>
+              <input type="password" id="loginPassword" placeholder="••••••••" 
+                     class="input-premium w-full pl-10 pr-12 py-3 rounded-lg text-sm font-medium" required>
+              <button type="button" onclick="togglePassword('loginPassword')" 
+                      class="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors">
+                <i class="fas fa-eye text-sm"></i>
+              </button>
+            </div>
+          </div>
+          <button type="submit" class="w-full bg-slate-900 text-white font-semibold py-3 rounded-lg hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/10 text-sm">
+              Sign In
+          </button>
+        </form>
+        
+        <div class="bg-slate-50 p-6 text-center border-t border-slate-100">
+          <p class="text-slate-500 text-sm">Don't have an account? 
+            <button onclick="switchAuth('signup')" class="text-brand-600 hover:text-brand-700 font-semibold transition-colors">
+              Create account
+            </button>
+          </p>
+        </div>
+      </div>
+
+      <div id="signupForm" class="hidden">
+        <div class="p-8 pb-0">
+          <h2 class="font-heading text-2xl font-bold text-slate-900">Create account</h2>
+          <p class="text-slate-500 text-sm mt-1">Start your 30-day professional journey.</p>
+        </div>
+        
+        <form id="signupFormElement" class="p-8 space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">Full Name</label>
+            <div class="relative">
+              <i class="fas fa-user absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 text-sm"></i>
+              <input type="text" id="signupName" placeholder="John Doe" 
+                     class="input-premium w-full pl-10 pr-4 py-3 rounded-lg text-sm font-medium" required>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">Email</label>
+            <div class="relative">
+              <i class="fas fa-envelope absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 text-sm"></i>
+              <input type="email" id="signupEmail" placeholder="name@company.com" 
+                     class="input-premium w-full pl-10 pr-4 py-3 rounded-lg text-sm font-medium" required>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">Password</label>
+            <div class="relative">
+              <i class="fas fa-lock absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 text-sm"></i>
+              <input type="password" id="signupPassword" placeholder="Min 6 characters" 
+                     class="input-premium w-full pl-10 pr-12 py-3 rounded-lg text-sm font-medium" required minlength="6">
+              <button type="button" onclick="togglePassword('signupPassword')" 
+                      class="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors">
+                <i class="fas fa-eye text-sm"></i>
+              </button>
+            </div>
+          </div>
+          <div>
+             <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5">Confirm Password</label>
+            <div class="relative">
+              <i class="fas fa-lock absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 text-sm"></i>
+              <input type="password" id="confirmPassword" placeholder="Confirm password" 
+                     class="input-premium w-full pl-10 pr-12 py-3 rounded-lg text-sm font-medium" required>
+              <button type="button" onclick="togglePassword('confirmPassword')" 
+                      class="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors">
+                <i class="fas fa-eye text-sm"></i>
+              </button>
+            </div>
+          </div>
+          <button type="submit" class="w-full bg-brand-600 text-white font-semibold py-3 rounded-lg hover:bg-brand-700 transition-colors shadow-lg shadow-brand-500/20 text-sm mt-2">
+            Get Started
+          </button>
+        </form>
+        
+        <div class="bg-slate-50 p-6 text-center border-t border-slate-100">
+          <p class="text-slate-500 text-sm">Already have an account? 
+            <button onclick="switchAuth('login')" class="text-brand-600 hover:text-brand-700 font-semibold transition-colors">
+              Sign in
+            </button>
+          </p>
+        </div>
+      </div>
+
+      <button onclick="hideAuth()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors p-2">
+        <i class="fas fa-times text-lg"></i>
+      </button>
+    </div>
+  </div>
+
+  <div id="successMessage" class="fixed top-6 right-6 bg-white border-l-4 border-emerald-500 text-slate-700 px-6 py-4 rounded-r-lg shadow-2xl hidden z-50 transform transition-all duration-300 flex items-center gap-3">
+    <i class="fas fa-check-circle text-xl text-emerald-500"></i>
+    <span id="successText" class="font-medium text-sm"></span>
+  </div>
+
+  <div id="errorMessage" class="fixed top-6 right-6 bg-white border-l-4 border-red-500 text-slate-700 px-6 py-4 rounded-r-lg shadow-2xl hidden z-50 transform transition-all duration-300 flex items-center gap-3">
+    <i class="fas fa-exclamation-circle text-xl text-red-500"></i>
+    <span id="errorText" class="font-medium text-sm"></span>
+  </div>
+
+  <script>
+    class AuthManager {
+      constructor() {
+        this.currentUser = null;
+        this.users = this.loadUsers();
+        this.init();
+      }
+
+      init() {
+        const savedUser = localStorage.getItem('cn_current_user');
+        if (savedUser) {
+          try {
+            this.currentUser = JSON.parse(savedUser);
+            this.redirectToDashboard();
+          } catch (error) {
+            localStorage.removeItem('cn_current_user');
+          }
+        }
+      }
+
+      loadUsers() {
+        try {
+          return JSON.parse(localStorage.getItem('cn_users')) || {};
+        } catch {
+          return {};
+        }
+      }
+
+      saveUsers() {
+        localStorage.setItem('cn_users', JSON.stringify(this.users));
+      }
+
+      hashPassword(password) {
+        let hash = 0;
+        for (let i = 0; i < password.length; i++) {
+          const char = password.charCodeAt(i);
+          hash = ((hash << 5) - hash) + char;
+          hash = hash & hash;
+        }
+        return hash.toString();
+      }
+
+      validateEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+      }
+
+      validatePassword(password) {
+        return password.length >= 6;
+      }
+
+      async signup(name, email, password, confirmPassword) {
+        try {
+          if (!name.trim()) {
+            throw new Error('Name is required');
+          }
+          if (!this.validateEmail(email)) {
+            throw new Error('Please enter a valid email address');
+          }
+          if (!this.validatePassword(password)) {
+            throw new Error('Password must be at least 6 characters long');
+          }
+          if (password !== confirmPassword) {
+            throw new Error('Passwords do not match');
+          }
+          if (this.users[email.toLowerCase().trim()]) {
+            throw new Error('An account with this email already exists');
+          }
+
+          const hashedPassword = this.hashPassword(password);
+          const user = {
+            id: Date.now().toString(),
+            name: name.trim(),
+            email: email.toLowerCase().trim(),
+            password: hashedPassword,
+            createdAt: new Date().toISOString(),
+            profile: {
+              name: name.trim(),
+              email: email.toLowerCase().trim(),
+              phone: '',
+              bio: '',
+              photo: ''
+            }
+          };
+
+          this.users[email.toLowerCase().trim()] = user;
+          this.saveUsers();
+          
+          return { success: true, message: 'Account created successfully!' };
+        } catch (error) {
+          return { success: false, message: error.message };
+        }
+      }
+
+      async login(email, password) {
+        try {
+          if (!this.validateEmail(email)) {
+            throw new Error('Please enter a valid email address');
+          }
+          if (!password) {
+            throw new Error('Password is required');
+          }
+
+          const user = this.users[email.toLowerCase().trim()];
+          if (!user) {
+            throw new Error('No account found with this email address');
+          }
+
+          const hashedPassword = this.hashPassword(password);
+          if (user.password !== hashedPassword) {
+            throw new Error('Incorrect password');
+          }
+
+          // Check and set first login status
+          const firstLoginKey = `cn_first_login_${user.id}`;
+          const isReturningUser = localStorage.getItem(`cn_last_login_${user.id}`);
+          
+          if (!isReturningUser) {
+              localStorage.setItem(firstLoginKey, 'true');
+          }
+          localStorage.setItem(`cn_last_login_${user.id}`, new Date().toISOString());
+          
+          this.currentUser = user;
+          localStorage.setItem('cn_current_user', JSON.stringify(user)); 
+          
+          return { success: true, message: 'Welcome back!' };
+        } catch (error) {
+          return { success: false, message: error.message };
+        }
+      }
+
+      logout() {
+        this.currentUser = null;
+        localStorage.removeItem('cn_current_user');
+        window.location.href = 'index.html';
+      }
+
+      redirectToDashboard() {
+        window.location.href = "dashboard.html";
+      }
+    }
+
+    function showAuth(type) {
+      const modal = document.getElementById('authModal');
+      const loginForm = document.getElementById('loginForm');
+      const signupForm = document.getElementById('signupForm');
+      
+      modal.classList.remove('hidden');
+      
+      if (type === 'login') {
+        loginForm.classList.remove('hidden');
+        signupForm.classList.add('hidden');
+      } else {
+        signupForm.classList.remove('hidden');
+        loginForm.classList.add('hidden');
+      }
+    }
+
+    function hideAuth() {
+      document.getElementById('authModal').classList.add('hidden');
+    }
+
+    function switchAuth(type) {
+      showAuth(type);
+    }
+
+    function togglePassword(inputId) {
+      const input = document.getElementById(inputId);
+      const button = input.closest('.relative').querySelector('button');
+      const icon = button.querySelector('i');
+      
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+      } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+      }
+    }
+
+    // UPDATED: Notification function to work with new styling
+    function showMessage(message, isError = false) {
+      const successEl = document.getElementById('successMessage');
+      const errorEl = document.getElementById('errorMessage');
+      const targetEl = isError ? errorEl : successEl;
+      const textSpan = isError ? document.getElementById('errorText') : document.getElementById('successText');
+      
+      // Reset
+      successEl.classList.add('hidden');
+      errorEl.classList.add('hidden');
+      
+      textSpan.textContent = message;
+      targetEl.classList.remove('hidden');
+      
+      // Animate in
+      targetEl.style.transform = 'translateX(100%)';
+      setTimeout(() => {
+        targetEl.style.transform = 'translateX(0)';
+      }, 50);
+      
+      setTimeout(() => {
+        targetEl.style.transform = 'translateX(100%)';
+        setTimeout(() => targetEl.classList.add('hidden'), 300);
+      }, 4000);
+    }
+
+
+    const authManager = new AuthManager();
+
+    document.getElementById('loginFormElement').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+      
+      const loginBtn = e.target.querySelector('button[type="submit"]');
+      const originalText = loginBtn.innerText;
+      loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Signing In...';
+      loginBtn.disabled = true;
+
+      const result = await authManager.login(email, password);
+      
+      if (result.success) {
+        showMessage(result.message);
+        setTimeout(() => {
+          hideAuth();
+          authManager.redirectToDashboard();
+        }, 1000);
+      } else {
+        showMessage(result.message, true);
+        loginBtn.innerHTML = originalText;
+        loginBtn.disabled = false;
+      }
+    });
+
+ document.getElementById('signupFormElement').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const name = document.getElementById('signupName').value;
+      const email = document.getElementById('signupEmail').value;
+      const password = document.getElementById('signupPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      const signupBtn = e.target.querySelector('button[type="submit"]');
+      const originalText = signupBtn.innerText;
+      signupBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Creating Account...';
+      signupBtn.disabled = true;
+      
+      const result = await authManager.signup(name, email, password, confirmPassword);
+      
+      if (result.success) {
+        showMessage(result.message);
+        
+        const loginResult = await authManager.login(email, password);
+        
+        if (loginResult.success) {
+            setTimeout(() => {
+                hideAuth();
+                authManager.redirectToDashboard();
+            }, 1000);
+        } else {
+            document.getElementById('signupPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+            setTimeout(() => {
+                switchAuth('login');
+                document.getElementById('loginEmail').value = email;
+            }, 1500);
+        }
+      } else {
+        showMessage(result.message, true);
+        signupBtn.innerHTML = originalText;
+        signupBtn.disabled = false;
+      }
+    });
+
+    document.getElementById('authModal').addEventListener('click', (e) => {
+      if (e.target.id === 'authModal') {
+        hideAuth();
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        hideAuth();
+      }
+    });
+    
+  </script>
+</body>
+</html>
