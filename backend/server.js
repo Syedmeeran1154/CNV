@@ -145,25 +145,40 @@ app.post("/api/jd-match", async (req, res) => {
     const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
     try {
-        const { resumeText, jdText } = req.body;
-        if (!resumeText || !jdText) {
-            return res.status(400).json({ error: "Missing resume or job description" });
+        const { profile, jdText } = req.body;
+        
+        if (!profile || !jdText) {
+            return res.status(400).json({ error: "Missing profile data or job description" });
         }
 
-        const prompt = `
-        You are an expert ATS (Applicant Tracking System). 
-        Analyze the Resume against the Job Description.
-        
-        Resume: ${resumeText}
-        Job Description: ${jdText}
+        // Convert the profile object into a string for the AI to read easily
+        const candidateProfile = `
+        Name: ${profile.name}
+        Bio: ${profile.bio}
+        Skills: ${profile.skills.join(", ")}
+        Experience: ${JSON.stringify(profile.experience)}
+        Projects: ${JSON.stringify(profile.projects)}
+        Certifications: ${profile.certifications.join(", ")}
+        `;
 
-        Return ONLY a JSON object with this exact structure:
+        const prompt = `
+        You are an expert ATS and Career Coach. Analyze the Candidate Profile against the Job Description.
+        
+        CANDIDATE PROFILE:
+        ${candidateProfile}
+
+        JOB DESCRIPTION:
+        ${jdText}
+
+        STRICT JSON RESPONSE FORMAT:
         {
-          "matchPercentage": 85,
-          "missingSkills": ["Skill A", "Skill B"],
-          "keywordHits": ["Keyword 1", "Keyword 2"],
-          "analysis": "Brief summary of fit"
-        }`;
+          "match_score": 85,
+          "verdict": "Strong match with minor skill gaps.",
+          "matched_skills": ["Skill A", "Skill B"],
+          "missing_skills": ["Skill C"],
+          "recommendations": ["Recommendation 1", "Recommendation 2"]
+        }
+        `;
 
         const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
             method: "POST",
@@ -174,7 +189,7 @@ app.post("/api/jd-match", async (req, res) => {
             body: JSON.stringify({
                 model: "llama-3.1-8b-instant",
                 messages: [{ role: "user", content: prompt }],
-                temperature: 0.5,
+                temperature: 0.3, // Lower temperature for more consistent scoring
                 response_format: { type: "json_object" }
             })
         });
@@ -185,10 +200,9 @@ app.post("/api/jd-match", async (req, res) => {
 
     } catch (error) {
         console.error("JD Match Error:", error);
-        res.status(500).json({ error: "Failed to analyze JD" });
+        res.status(500).json({ error: "Failed to analyze Job Description" });
     }
 });
-
 // ==============================
 // 🚀 START SERVER
 // ==============================
