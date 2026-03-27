@@ -94,23 +94,20 @@ app.post("/api/career-coach", async (req, res) => {
             return res.status(400).json({ error: "Missing required fields" });
         }
 
-        const prompt = `
-You are an AI Career Coach.
+        // Inside app.post("/api/career-coach", ...)
+const prompt = `
+You are an AI Career Coach. 
+Create a career roadmap for a user moving from ${currentRole} to ${targetRole}.
 
-Create a structured career roadmap.
+STRICT JSON FORMAT:
+{
+  "phases": ["Step 1 description", "Step 2 description"],
+  "skills_to_learn": ["Skill Name 1", "Skill Name 2"],
+  "projects": ["Project Name 1", "Project Name 2"],
+  "tips": ["Tip 1", "Tip 2"]
+}
 
-Current Role: ${currentRole}
-Target Role: ${targetRole}
-Experience: ${experienceYears} years
-Skills: ${currentSkills}
-Goals: ${goals}
-Timeline: ${timeline}
-
-Return JSON with:
-- phases (array of steps)
-- skills_to_learn (array)
-- projects (array)
-- tips (array)
+IMPORTANT: Every item in every array MUST be a simple string. Do not return objects.
 `;
 
         const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
