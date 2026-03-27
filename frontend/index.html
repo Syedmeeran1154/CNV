@@ -63,13 +63,13 @@ async function callCareerAPI(endpoint, payload) {
 }
 
 // Example usage for your Roadmap feature:
+// Change 'generate-roadmap' to 'career-coach'
 async function handleGenerateRoadmap(role, company) {
-    const roadmap = await callCareerAPI('generate-roadmap', { 
-        jobRole: role, 
-        targetCompany: company 
+    const roadmap = await callCareerAPI('career-coach', { 
+        currentRole: role, 
+        targetRole: company,
+        // ... add other required fields like currentSkills, experienceYears ...
     });
-    console.log("Roadmap Generated:", roadmap);
-    // Logic to display roadmap in UI goes here
 }
   </script>
 
@@ -636,7 +636,7 @@ async function handleGenerateRoadmap(role, company) {
       }
 
       redirectToDashboard() {
-        window.location.href = "dashboard.html";
+        window.location.href = "/dashboard";
       }
     }
 

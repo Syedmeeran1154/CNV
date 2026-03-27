@@ -1378,7 +1378,7 @@ async function extractResumeText(file) {
   throw new Error("Unsupported file type or extraction failure.");
 }
       async function analyzeResume(resumeText) {
-  const res = await fetch("https://careernest-backend-jbk3.onrender.com/api/resume-score", {
+  const res = await fetch("http://localhost:3000/api/resume-score", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ resumeText })
