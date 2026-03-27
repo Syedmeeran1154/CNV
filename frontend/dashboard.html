@@ -2394,72 +2394,75 @@ async handleCoachFormSubmit(e) { // ⭐ CHANGED TO ASYNC METHOD
         careerGoals: document.getElementById("careerGoals").value,
         timeline: document.getElementById("timeline").value
     };
-try {
-    const res = await fetch("https://cnv-z6k7.onrender.com/api/career-coach", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-    });
 
-    if (!res.ok) {
-        const errorBody = await res.json().catch(() => ({ error: "Server responded with an error." }));
-        throw new Error(`API failed: ${errorBody.error}`);
-    }
+    try {
+        const res = await fetch("https://cnv-z6k7.onrender.com/api/career-coach", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
 
-    const data = await res.json();
-    this.showNotification('Roadmap generated successfully!');
+        if (!res.ok) {
+            const errorBody = await res.json().catch(() => ({ error: "Server responded with an error." }));
+            throw new Error(`API failed: ${errorBody.error}`);
+        }
 
-    output.innerHTML = `
-      <div class="bg-indigo-100 border border-indigo-300 p-4 rounded-lg shadow-sm">
-        <h4 class="font-bold text-lg text-indigo-800 mb-2">Career Direction Summary</h4>
-        <p class="text-slate-700">${data.summary}</p>
-      </div>
-      
-      <div class="mt-6">
-        <h3 class="text-xl font-bold text-indigo-700 mb-3 border-b pb-1"><i class="fas fa-route mr-2"></i>Personalized Roadmap</h3>
-        ${(data.roadmap || []).map(p => `
-          <div class="mt-3 p-4 border-l-4 border-indigo-400 bg-indigo-50 rounded-lg shadow-sm">
-            <h4 class="text-lg font-bold text-indigo-800">${p.phase}</h4>
-            <p class="text-xs text-slate-600 mb-2">Duration: ${p.duration}</p>
-            <div class="font-semibold text-sm text-slate-700 mt-2">Key Focus: ${(p.focus || []).join(", ")}</div>
-            <ul class="list-disc list-inside text-sm text-slate-700 pl-4 mt-2">
-              ${(p.actions || []).map(a => `<li>${a}</li>`).join("")}
-            </ul>
+        const data = await res.json();
+        this.showNotification('Roadmap generated successfully!');
+
+        output.innerHTML = `
+          <div class="bg-indigo-100 border border-indigo-300 p-4 rounded-lg shadow-sm">
+            <h4 class="font-bold text-lg text-indigo-800 mb-2">Career Direction Summary</h4>
+            <p class="text-slate-700">${data.summary}</p>
           </div>
-        `).join("")}
-      </div>
-      
-      <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-            <h3 class="text-xl font-bold text-indigo-700 mb-3 border-b pb-1"><i class="fas fa-exclamation-triangle mr-2"></i>Identified Skill Gaps</h3>
-            <div class="flex flex-wrap gap-2">
-                ${(data.skill_gaps || []).map(s => `<span class="bg-red-100 text-red-700 text-sm font-semibold px-3 py-1 rounded-full">${s}</span>`).join("")}
+          
+          <div class="mt-6">
+            <h3 class="text-xl font-bold text-indigo-700 mb-3 border-b pb-1"><i class="fas fa-route mr-2"></i>Personalized Roadmap</h3>
+            ${data.roadmap.map(p => `
+              <div class="mt-3 p-4 border-l-4 border-indigo-400 bg-indigo-50 rounded-lg shadow-sm">
+                <h4 class="text-lg font-bold text-indigo-800">${p.phase}</h4>
+                <p class="text-xs text-slate-600 mb-2">Duration: ${p.duration}</p>
+                <div class="font-semibold text-sm text-slate-700 mt-2">Key Focus: ${p.focus.join(", ")}</div>
+                <ul class="list-disc list-inside text-sm text-slate-700 pl-4 mt-2">
+                  ${p.actions.map(a => `<li>${a}</li>`).join("")}
+                </ul>
+              </div>
+            `).join("")}
+          </div>
+          
+          <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <h3 class="text-xl font-bold text-indigo-700 mb-3 border-b pb-1"><i class="fas fa-exclamation-triangle mr-2"></i>Identified Skill Gaps</h3>
+                <div class="flex flex-wrap gap-2">
+                    ${data.skill_gaps.map(s => `<span class="bg-red-100 text-red-700 text-sm font-semibold px-3 py-1 rounded-full">${s}</span>`).join("")}
+                </div>
+                <h3 class="text-xl font-bold text-indigo-700 mb-3 border-b pb-1 mt-6"><i class="fas fa-medal mr-2"></i>Certifications</h3>
+                <ul class="list-disc list-inside text-sm text-slate-700">
+                  ${data.certifications.map(c => `<li>${c}</li>`).join("")}
+                </ul>
             </div>
-            <h3 class="text-xl font-bold text-indigo-700 mb-3 border-b pb-1 mt-6"><i class="fas fa-medal mr-2"></i>Certifications</h3>
-            <ul class="list-disc list-inside text-sm text-slate-700">
-              ${(data.certifications || []).map(c => `<li>${c}</li>`).join("")}
-            </ul>
-        </div>
+            
+            <div>
+                <h3 class="text-xl font-bold text-indigo-700 mb-3 border-b pb-1"><i class="fas fa-lightbulb mr-2"></i>Recommended Projects</h3>
+                <ul class="list-disc list-inside text-sm text-slate-700">
+                  ${data.project_ideas.map(p => `<li>${p}</li>`).join("")}
+                </ul>
+                <h3 class="text-xl font-bold text-indigo-700 mb-3 border-b pb-1 mt-6"><i class="fas fa-calendar-alt mr-2"></i>Daily Practice Plan</h3>
+                <ul class="list-disc list-inside text-sm text-slate-700">
+                  ${data.daily_plan.map(d => `<li>${d}</li>`).join("")}
+                </ul>
+            </div>
+          </div>
+        `;
+    } catch (err) {
+        output.innerHTML = `<div class="text-red-600 p-4 bg-red-50 border border-red-200 rounded-lg"><i class="fas fa-exclamation-circle mr-2"></i>Failed to generate roadmap: ${err.message}</div>`;
+        this.showNotification(`Error: ${err.message}`, true);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-route"></i> Generate Personalized Roadmap';
+    }
+}
         
-        <div>
-            <h3 class="text-xl font-bold text-indigo-700 mb-3 border-b pb-1"><i class="fas fa-lightbulb mr-2"></i>Recommended Projects</h3>
-            <ul class="list-disc list-inside text-sm text-slate-700">
-              ${(data.project_ideas || []).map(p => `<li>${p}</li>`).join("")}
-            </ul>
-            <h3 class="text-xl font-bold text-indigo-700 mb-3 border-b pb-1 mt-6"><i class="fas fa-calendar-alt mr-2"></i>Daily Practice Plan</h3>
-            <ul class="list-disc list-inside text-sm text-slate-700">
-              ${(data.daily_plan || []).map(d => `<li>${d}</li>`).join("")}
-            </ul>
-        </div>
-      </div>
-    `;
-} catch (err) {
-    output.innerHTML = `<div class="text-red-600 p-4 bg-red-50 border border-red-200 rounded-lg"><i class="fas fa-exclamation-circle mr-2"></i>Failed to generate roadmap: ${err.message}</div>`;
-    this.showNotification(`Error: ${err.message}`, true);
-} finally {
-    btn.disabled = false;
-    btn.innerHTML = '<i class="fas fa-route"></i> Generate Personalized Roadmap';
-}     
         renderAnalytics() {
           // Generate skill map
           const skillMap = this.skillMapper.generateSkillMap(this.skills, this.projects, this.certs, this.interns);
