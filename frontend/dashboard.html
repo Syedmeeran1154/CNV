@@ -1349,8 +1349,16 @@ async function generateInterviewPrep() {
  * Handles the AI Career Coach Roadmap Generation
  * References: server.js and dashboard.html
  */
+/**
+ * AI Career Coach Frontend Handler
+ * Fixes [object Object] and undefined issues by normalizing data types
+ */
 async function generateCareerRoadmap() {
-    // 1. Get Form Inputs
+    // 1. Get DOM Elements
+    const outputContainer = document.getElementById('roadmapOutput');
+    const generateBtn = document.getElementById('generate-roadmap-btn');
+    
+    // Form Inputs
     const currentRole = document.getElementById('current-role')?.value;
     const targetRole = document.getElementById('target-role')?.value;
     const experience = document.getElementById('experience-years')?.value;
@@ -1358,84 +1366,118 @@ async function generateCareerRoadmap() {
     const goals = document.getElementById('career-goals')?.value;
     const timeline = document.getElementById('timeline')?.value;
 
-    // 2. Identify UI Containers (Replace with your actual IDs)
-    const roadmapContainer = document.getElementById('roadmap-steps-container');
-    const skillsList = document.getElementById('skills-to-learn-list');
-    const projectsList = document.getElementById('projects-list');
-    const tipsList = document.getElementById('tips-list');
-    const generateBtn = document.getElementById('generate-roadmap-btn');
+    if (!outputContainer) return;
 
-    if (!roadmapContainer) return;
+    // --- Helper: Safely extract text from strings or objects ---
+    const getText = (item) => {
+        if (!item) return "N/A";
+        if (typeof item === 'string') return item;
+        // Check common AI object keys: name, title, or description
+        return item.name || item.title || item.step || item.description || JSON.stringify(item);
+    };
 
     try {
-        // 3. Set Loading State
+        // 2. Loading State
         generateBtn.disabled = true;
-        generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Generating...';
-        roadmapContainer.innerHTML = `<div class="col-span-full text-center py-10">
-            <div class="animate-pulse text-indigo-600 font-semibold">AI is crafting your personalized roadmap...</div>
-        </div>`;
+        generateBtn.innerHTML = '<i class="fas fa-circle-notch animate-spin mr-2"></i> Generating...';
+        
+        // Show a "Skeleton" or loading message in the output
+        outputContainer.innerHTML = `
+            <div class="flex flex-col items-center justify-center py-12 text-indigo-500">
+                <div class="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
+                <p class="font-medium animate-pulse">Consulting Career Coach AI...</p>
+            </div>`;
 
-        // 4. Fetch Data from Backend
+        // 3. API Call (matches your server.js route)
         const response = await fetch("/api/career-coach", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                currentRole,
-                targetRole,
-                experienceYears: experience,
-                currentSkills: skills,
-                goals,
-                timeline
+                currentRole, targetRole, experienceYears: experience,
+                currentSkills: skills, goals, timeline
             })
         });
 
-        if (!response.ok) throw new Error("Failed to fetch roadmap");
+        if (!response.ok) throw new Error(`Server responded with ${response.status}`);
+        
         const data = await response.json();
 
-        // 5. Render Roadmap Phases (Timeline view)
-        roadmapContainer.innerHTML = data.phases.map((step, index) => `
-            <div class="relative pl-8 pb-8 border-l-2 border-indigo-100 last:border-0">
-                <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-indigo-600 shadow-sm shadow-indigo-200"></div>
-                <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-                    <span class="text-xs font-bold text-indigo-500 uppercase tracking-wider">Phase ${index + 1}</span>
-                    <p class="text-gray-700 mt-2 font-medium">${step}</p>
+        // 4. Render Dynamic Content
+        // We use template literals and map() with our getText() helper to prevent [object Object]
+        outputContainer.innerHTML = `
+            <div class="space-y-8 animate-in fade-in duration-500">
+                
+                <div>
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-map-signs mr-2 text-indigo-500"></i> Personalized Learning Path
+                    </h3>
+                    <div class="space-y-4">
+                        ${data.phases.map((phase, index) => `
+                            <div class="flex items-start gap-4 p-4 bg-white border border-gray-100 rounded-xl shadow-sm hover:border-indigo-200 transition-colors">
+                                <div class="flex-shrink-0 w-8 h-8 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                                    ${index + 1}
+                                </div>
+                                <p class="text-gray-700 leading-relaxed pt-1">${getText(phase)}</p>
+                            </div>
+                        `).join('')}
+                    </div>
                 </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-indigo-50/50 p-5 rounded-2xl border border-indigo-100">
+                        <h4 class="font-bold text-indigo-900 mb-3 flex items-center">
+                            <i class="fas fa-graduation-cap mr-2"></i> Skills & Certifications
+                        </h4>
+                        <div class="flex flex-wrap gap-2">
+                            ${data.skills_to_learn.map(skill => `
+                                <span class="px-3 py-1 bg-white border border-indigo-200 text-indigo-700 rounded-lg text-sm font-medium shadow-sm">
+                                    ${getText(skill)}
+                                </span>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div class="bg-emerald-50/50 p-5 rounded-2xl border border-emerald-100">
+                        <h4 class="font-bold text-emerald-900 mb-3 flex items-center">
+                            <i class="fas fa-code-branch mr-2"></i> Portfolio Projects
+                        </h4>
+                        <ul class="space-y-2">
+                            ${data.projects.map(project => `
+                                <li class="text-sm text-emerald-800 flex items-center gap-2">
+                                    <i class="fas fa-check-circle text-emerald-500"></i>
+                                    ${getText(project)}
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="p-4 bg-amber-50 rounded-xl border-l-4 border-amber-400">
+                    <h4 class="text-amber-900 font-bold mb-2 flex items-center text-sm">
+                        <i class="fas fa-lightbulb mr-2"></i> Pro-Tips for Success
+                    </h4>
+                    <ul class="list-disc list-inside text-sm text-amber-800 space-y-1">
+                        ${data.tips.map(tip => `<li>${getText(tip)}</li>`).join('')}
+                    </ul>
+                </div>
+
             </div>
-        `).join('');
-
-        // 6. Render Skills, Projects, and Tips
-        skillsList.innerHTML = data.skills_to_learn.map(skill => `
-            <span class="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-sm font-medium border border-indigo-100">
-                <i class="fas fa-check-circle mr-1"></i> ${skill}
-            </span>
-        `).join('');
-
-        projectsList.innerHTML = data.projects.map(proj => `
-            <li class="flex items-start space-x-3 text-gray-600">
-                <i class="fas fa-project-diagram mt-1 text-indigo-400"></i>
-                <span>${proj}</span>
-            </li>
-        `).join('');
-
-        tipsList.innerHTML = data.tips.map(tip => `
-            <div class="p-3 bg-amber-50 rounded-lg border-l-4 border-amber-400 text-amber-800 text-sm">
-                <i class="fas fa-lightbulb mr-2"></i> ${tip}
-            </div>
-        `).join('');
+        `;
 
     } catch (error) {
-        console.error("Roadmap Error:", error);
-        roadmapContainer.innerHTML = `
-            <div class="col-span-full p-4 bg-red-50 text-red-700 rounded-lg border border-red-200">
-                <i class="fas fa-exclamation-circle mr-2"></i> 
-                Failed to generate roadmap. Please try again later.
+        console.error("Career Coach Error:", error);
+        outputContainer.innerHTML = `
+            <div class="p-6 bg-red-50 border border-red-100 rounded-2xl text-center">
+                <i class="fas fa-exclamation-triangle text-red-500 text-3xl mb-3"></i>
+                <p class="text-red-800 font-semibold">Something went wrong</p>
+                <p class="text-red-600 text-sm mt-1">${error.message}</p>
+                <button onclick="generateCareerRoadmap()" class="mt-4 text-sm font-medium text-red-700 underline">Try Again</button>
             </div>`;
     } finally {
         generateBtn.disabled = false;
         generateBtn.innerHTML = '<i class="fas fa-magic mr-2"></i> Generate Roadmap';
     }
 }
-
 // Attach to global scope for button click
 window.generateCareerRoadmap = generateCareerRoadmap;
 
