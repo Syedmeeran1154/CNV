@@ -1345,7 +1345,99 @@ async function generateInterviewPrep() {
   // Ensure the Technical tab is active by default
   switchTab('Technical');
 }
+/**
+ * Handles the AI Career Coach Roadmap Generation
+ * References: server.js and dashboard.html
+ */
+async function generateCareerRoadmap() {
+    // 1. Get Form Inputs
+    const currentRole = document.getElementById('current-role')?.value;
+    const targetRole = document.getElementById('target-role')?.value;
+    const experience = document.getElementById('experience-years')?.value;
+    const skills = document.getElementById('current-skills')?.value;
+    const goals = document.getElementById('career-goals')?.value;
+    const timeline = document.getElementById('timeline')?.value;
 
+    // 2. Identify UI Containers (Replace with your actual IDs)
+    const roadmapContainer = document.getElementById('roadmap-steps-container');
+    const skillsList = document.getElementById('skills-to-learn-list');
+    const projectsList = document.getElementById('projects-list');
+    const tipsList = document.getElementById('tips-list');
+    const generateBtn = document.getElementById('generate-roadmap-btn');
+
+    if (!roadmapContainer) return;
+
+    try {
+        // 3. Set Loading State
+        generateBtn.disabled = true;
+        generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Generating...';
+        roadmapContainer.innerHTML = `<div class="col-span-full text-center py-10">
+            <div class="animate-pulse text-indigo-600 font-semibold">AI is crafting your personalized roadmap...</div>
+        </div>`;
+
+        // 4. Fetch Data from Backend
+        const response = await fetch("/api/career-coach", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                currentRole,
+                targetRole,
+                experienceYears: experience,
+                currentSkills: skills,
+                goals,
+                timeline
+            })
+        });
+
+        if (!response.ok) throw new Error("Failed to fetch roadmap");
+        const data = await response.json();
+
+        // 5. Render Roadmap Phases (Timeline view)
+        roadmapContainer.innerHTML = data.phases.map((step, index) => `
+            <div class="relative pl-8 pb-8 border-l-2 border-indigo-100 last:border-0">
+                <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-indigo-600 shadow-sm shadow-indigo-200"></div>
+                <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                    <span class="text-xs font-bold text-indigo-500 uppercase tracking-wider">Phase ${index + 1}</span>
+                    <p class="text-gray-700 mt-2 font-medium">${step}</p>
+                </div>
+            </div>
+        `).join('');
+
+        // 6. Render Skills, Projects, and Tips
+        skillsList.innerHTML = data.skills_to_learn.map(skill => `
+            <span class="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-sm font-medium border border-indigo-100">
+                <i class="fas fa-check-circle mr-1"></i> ${skill}
+            </span>
+        `).join('');
+
+        projectsList.innerHTML = data.projects.map(proj => `
+            <li class="flex items-start space-x-3 text-gray-600">
+                <i class="fas fa-project-diagram mt-1 text-indigo-400"></i>
+                <span>${proj}</span>
+            </li>
+        `).join('');
+
+        tipsList.innerHTML = data.tips.map(tip => `
+            <div class="p-3 bg-amber-50 rounded-lg border-l-4 border-amber-400 text-amber-800 text-sm">
+                <i class="fas fa-lightbulb mr-2"></i> ${tip}
+            </div>
+        `).join('');
+
+    } catch (error) {
+        console.error("Roadmap Error:", error);
+        roadmapContainer.innerHTML = `
+            <div class="col-span-full p-4 bg-red-50 text-red-700 rounded-lg border border-red-200">
+                <i class="fas fa-exclamation-circle mr-2"></i> 
+                Failed to generate roadmap. Please try again later.
+            </div>`;
+    } finally {
+        generateBtn.disabled = false;
+        generateBtn.innerHTML = '<i class="fas fa-magic mr-2"></i> Generate Roadmap';
+    }
+}
+
+// Attach to global scope for button click
+window.generateCareerRoadmap = generateCareerRoadmap;
 
 async function extractResumeText(file) {
   const ext = file.name.split('.').pop().toLowerCase();
