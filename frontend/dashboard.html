@@ -1357,17 +1357,21 @@ async function generateCareerRoadmap() {
     const output = document.getElementById('roadmapOutput');
     const btn = document.getElementById('generate-roadmap-btn');
     
-    // UI Helper: Prevents [object Object] and undefined
-    const clean = (item) => {
+    // Safety check: extract text whether it's a string or an object
+    const val = (item) => {
         if (!item) return "";
-        return typeof item === 'object' ? (item.name || item.title || item.step || "View Details") : item;
+        return typeof item === 'object' ? (item.name || item.title || item.step || Object.values(item)[0]) : item;
     };
 
     try {
-        // Start Loading State
+        // Show loading and clear old "Empty" steps
         btn.disabled = true;
-        btn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i> Analyzing...`;
-        output.innerHTML = `<div class="p-10 text-center text-indigo-500 animate-pulse">Building your roadmap...</div>`;
+        btn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i> Thinking...`;
+        output.innerHTML = `
+            <div class="flex flex-col items-center justify-center p-12">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+                <p class="mt-4 text-indigo-600 font-medium">Crafting your personalized path...</p>
+            </div>`;
 
         const response = await fetch("/api/career-coach", {
             method: "POST",
@@ -1384,37 +1388,46 @@ async function generateCareerRoadmap() {
 
         const data = await response.json();
 
-        // Render the UI
+        // If the API returns phases, we REWRITE the HTML to remove the empty Step 1, 2, 3
         output.innerHTML = `
-            <div class="space-y-6">
-                <h3 class="text-xl font-bold text-gray-800">Your AI Roadmap</h3>
+            <div class="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <h3 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="fas fa-route mr-2 text-indigo-500"></i> Your Career Roadmap
+                </h3>
                 
-                <div class="space-y-3">
-                    ${data.phases.map((p, i) => `
-                        <div class="flex gap-4 p-4 bg-white rounded-lg border border-gray-100 shadow-sm">
-                            <span class="font-bold text-indigo-600">${i+1}.</span>
-                            <p class="text-gray-700">${clean(p)}</p>
+                <div class="space-y-6 mb-8">
+                    ${data.phases.map((step, i) => `
+                        <div class="relative pl-8 border-l-2 border-indigo-200 last:border-0 pb-6">
+                            <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-indigo-600 ring-4 ring-indigo-50"></div>
+                            <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+                                <span class="text-xs font-bold text-indigo-500 uppercase">Step ${i + 1}</span>
+                                <p class="text-gray-700 mt-1">${val(step)}</p>
+                            </div>
                         </div>
                     `).join('')}
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="p-4 bg-indigo-50 rounded-xl">
-                        <p class="font-bold text-indigo-900 mb-2">Skills to Master</p>
+                    <div class="p-4 bg-blue-50 rounded-xl border border-blue-100">
+                        <p class="font-bold text-blue-900 mb-2"><i class="fas fa-tools mr-2"></i>Skills to Learn</p>
                         <div class="flex flex-wrap gap-2">
-                            ${data.skills_to_learn.map(s => `<span class="bg-white px-2 py-1 rounded text-sm border">${clean(s)}</span>`).join('')}
+                            ${data.skills_to_learn.map(s => `<span class="bg-white px-2 py-1 rounded text-sm text-blue-700 border border-blue-200">${val(s)}</span>`).join('')}
                         </div>
                     </div>
-                    <div class="p-4 bg-green-50 rounded-xl">
-                        <p class="font-bold text-green-900 mb-2">Suggested Projects</p>
-                        <ul class="text-sm list-disc list-inside">${data.projects.map(proj => `<li>${clean(proj)}</li>`).join('')}</ul>
+                    <div class="p-4 bg-purple-50 rounded-xl border border-purple-100">
+                        <p class="font-bold text-purple-900 mb-2"><i class="fas fa-lightbulb mr-2"></i>Pro Tips</p>
+                        <ul class="text-sm space-y-2 text-purple-800">
+                            ${data.tips.map(t => `<li class="flex items-start"><i class="fas fa-check-circle mt-1 mr-2 text-purple-400"></i>${val(t)}</li>`).join('')}
+                        </ul>
                     </div>
                 </div>
             </div>
         `;
 
     } catch (err) {
-        output.innerHTML = `<div class="p-4 bg-red-50 text-red-600">Error: ${err.message}</div>`;
+        output.innerHTML = `<div class="p-4 bg-red-50 text-red-600 rounded-lg border border-red-200">
+            <i class="fas fa-exclamation-circle mr-2"></i> Error: ${err.message}
+        </div>`;
     } finally {
         btn.disabled = false;
         btn.innerHTML = `<i class="fas fa-magic mr-2"></i> Generate Roadmap`;
