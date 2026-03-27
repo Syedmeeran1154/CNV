@@ -138,7 +138,56 @@ IMPORTANT: Every item in every array MUST be a simple string. Do not return obje
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+// ==============================
+// ✅ JD MATCH API (The missing piece)
+// ==============================
+app.post("/api/jd-match", async (req, res) => {
+    const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
+    try {
+        const { resumeText, jdText } = req.body;
+        if (!resumeText || !jdText) {
+            return res.status(400).json({ error: "Missing resume or job description" });
+        }
+
+        const prompt = `
+        You are an expert ATS (Applicant Tracking System). 
+        Analyze the Resume against the Job Description.
+        
+        Resume: ${resumeText}
+        Job Description: ${jdText}
+
+        Return ONLY a JSON object with this exact structure:
+        {
+          "matchPercentage": 85,
+          "missingSkills": ["Skill A", "Skill B"],
+          "keywordHits": ["Keyword 1", "Keyword 2"],
+          "analysis": "Brief summary of fit"
+        }`;
+
+        const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${GROQ_API_KEY}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                model: "llama-3.1-8b-instant",
+                messages: [{ role: "user", content: prompt }],
+                temperature: 0.5,
+                response_format: { type: "json_object" }
+            })
+        });
+
+        const data = await response.json();
+        const result = JSON.parse(data.choices[0].message.content);
+        res.json(result);
+
+    } catch (error) {
+        console.error("JD Match Error:", error);
+        res.status(500).json({ error: "Failed to analyze JD" });
+    }
+});
 
 // ==============================
 // 🚀 START SERVER
