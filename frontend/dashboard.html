@@ -2395,7 +2395,7 @@ async handleCoachFormSubmit(e) { // ⭐ CHANGED TO ASYNC METHOD
         timeline: document.getElementById("timeline").value
     };
 
-    try {
+   try {
         const res = await fetch("https://cnv-z6k7.onrender.com/api/career-coach", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -2403,63 +2403,79 @@ async handleCoachFormSubmit(e) { // ⭐ CHANGED TO ASYNC METHOD
         });
 
         if (!res.ok) {
-            const errorBody = await res.json().catch(() => ({ error: "Server responded with an error." }));
-            throw new Error(`API failed: ${errorBody.error}`);
+            const errorBody = await res.json().catch(() => ({ error: "Server error." }));
+            throw new Error(errorBody.error || "API failed");
         }
 
-       const data = await res.json();
+        const data = await res.json();
         this.showNotification('Roadmap generated successfully!');
 
-        // --- ADD THIS HELPER LINE ---
-        const safeArr = (val) => (Array.isArray(val) ? val : Object.values(val || {}));
+        // Helper to ensure we have an array even if the API returns an object
+        const toArr = (val) => (Array.isArray(val) ? val : Object.values(val || {}));
+
+        // CRITICAL FIX: Your server.js returns "phases", not "roadmap"
+        const roadmapData = toArr(data.phases || data.roadmap);
+        const skillGaps = toArr(data.skills_to_learn || data.skill_gaps);
+        const projects = toArr(data.projects || data.project_ideas);
 
         output.innerHTML = `
-          <div class="bg-indigo-100 border border-indigo-300 p-4 rounded-lg shadow-sm">
-            <h4 class="font-bold text-lg text-indigo-800 mb-2">Career Direction Summary</h4>
-            <p class="text-slate-700">${data.summary || 'Analysis complete.'}</p>
+          <div class="bg-indigo-50 border border-indigo-200 p-4 rounded-lg mb-6">
+            <h4 class="font-bold text-indigo-800 mb-1">Career Strategy</h4>
+            <p class="text-slate-700">${data.summary || 'Your personalized path is ready.'}</p>
           </div>
           
-          <div class="mt-6">
-            <h3 class="text-xl font-bold text-indigo-700 mb-3 border-b pb-1"><i class="fas fa-route mr-2"></i>Personalized Roadmap</h3>
-            ${safeArr(data.roadmap).map(p => `
-              <div class="mt-3 p-4 border-l-4 border-indigo-400 bg-indigo-50 rounded-lg shadow-sm">
-                <h4 class="text-lg font-bold text-indigo-800">${p.phase || 'Phase'}</h4>
-                <p class="text-xs text-slate-600 mb-2">Duration: ${p.duration || 'Flexible'}</p>
-                <div class="font-semibold text-sm text-slate-700 mt-2">Key Focus: ${Array.isArray(p.focus) ? p.focus.join(", ") : (p.focus || 'Skills development')}</div>
-                <ul class="list-disc list-inside text-sm text-slate-700 pl-4 mt-2">
-                  ${safeArr(p.actions).map(a => `<li>${a}</li>`).join("")}
+          <div class="space-y-4">
+            <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                <i class="fas fa-map-signs text-indigo-600"></i> Learning Path
+            </h3>
+            ${roadmapData.map((p, i) => `
+              <div class="p-4 border-l-4 border-indigo-500 bg-white shadow-sm rounded-r-lg">
+                <div class="flex justify-between items-start mb-2">
+                    <h4 class="font-bold text-indigo-900">${p.phase || p.title || `Step ${i+1}`}</h4>
+                    <span class="text-xs font-semibold bg-indigo-100 text-indigo-700 px-2 py-1 rounded">${p.duration || ''}</span>
+                </div>
+                <p class="text-sm text-slate-600 mb-2">${p.focus || ''}</p>
+                <ul class="list-disc list-inside text-sm text-slate-700 space-y-1">
+                  ${toArr(p.actions || p.tasks).map(a => `<li>${a}</li>`).join("")}
                 </ul>
               </div>
             `).join("")}
           </div>
           
-          <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <h3 class="text-xl font-bold text-indigo-700 mb-3 border-b pb-1"><i class="fas fa-exclamation-triangle mr-2"></i>Identified Skill Gaps</h3>
-                <div class="flex flex-wrap gap-2">
-                    ${safeArr(data.skill_gaps).map(s => `<span class="bg-red-100 text-red-700 text-sm font-semibold px-3 py-1 rounded-full">${s}</span>`).join("") || '<span class="text-slate-500 text-sm">None identified</span>'}
+          <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+                <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
+                    <i class="fas fa-book text-emerald-500"></i> Skills & Certs
+                </h3>
+                <div class="flex flex-wrap gap-2 mb-4">
+                    ${skillGaps.map(s => `<span class="bg-slate-100 text-slate-700 text-xs font-medium px-2.5 py-1 rounded-full">${s}</span>`).join("")}
                 </div>
-                <h3 class="text-xl font-bold text-indigo-700 mb-3 border-b pb-1 mt-6"><i class="fas fa-medal mr-2"></i>Certifications</h3>
-                <ul class="list-disc list-inside text-sm text-slate-700">
-                  ${safeArr(data.certifications).map(c => `<li>${c}</li>`).join("") || '<li>No specific certifications recommended.</li>'}
+                <ul class="text-sm text-slate-600 space-y-1">
+                    ${toArr(data.tips || data.certifications).map(c => `<li class="flex items-center gap-2"><i class="fas fa-check text-emerald-500 text-xs"></i> ${c}</li>`).join("")}
                 </ul>
             </div>
             
-            <div>
-                <h3 class="text-xl font-bold text-indigo-700 mb-3 border-b pb-1"><i class="fas fa-lightbulb mr-2"></i>Recommended Projects</h3>
-                <ul class="list-disc list-inside text-sm text-slate-700">
-                  ${safeArr(data.project_ideas).map(p => `<li>${p}</li>`).join("") || '<li>Apply skills to real-world tasks.</li>'}
-                </ul>
-                <h3 class="text-xl font-bold text-indigo-700 mb-3 border-b pb-1 mt-6"><i class="fas fa-calendar-alt mr-2"></i>Daily Practice Plan</h3>
-                <ul class="list-disc list-inside text-sm text-slate-700">
-                  ${safeArr(data.daily_plan).map(d => `<li>${d}</li>`).join("") || '<li>Consistency is key.</li>'}
+            <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+                <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
+                    <i class="fas fa-lightbulb text-amber-500"></i> Recommended Projects
+                </h3>
+                <ul class="space-y-3">
+                  ${projects.map(proj => `
+                    <li class="text-sm text-slate-700 pb-2 border-b border-slate-50 last:border-0">
+                        ${typeof proj === 'object' ? `<strong>${proj.name}:</strong> ${proj.description}` : proj}
+                    </li>
+                  `).join("")}
                 </ul>
             </div>
           </div>
         `;
     } catch (err) {
-        output.innerHTML = `<div class="text-red-600 p-4 bg-red-50 border border-red-200 rounded-lg"><i class="fas fa-exclamation-circle mr-2"></i>Failed to generate roadmap: ${err.message}</div>`;
-        this.showNotification(`Error: ${err.message}`, true);
+        output.innerHTML = `
+            <div class="text-center p-8 bg-red-50 rounded-xl border border-red-100">
+                <i class="fas fa-exclamation-circle text-red-500 text-3xl mb-3"></i>
+                <p class="text-red-800 font-semibold">Generation Failed</p>
+                <p class="text-red-600 text-sm">${err.message}</p>
+            </div>`;
     } finally {
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-route"></i> Generate Personalized Roadmap';
