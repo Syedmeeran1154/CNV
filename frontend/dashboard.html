@@ -2460,18 +2460,13 @@ document.getElementById('analyzeJdBtn').addEventListener('click', () => this.han
 // --- PART 1: AI CAREER COACH IMPLEMENTATION ---
 async handleCoachFormSubmit(e) {
     e.preventDefault();
-
     const btn = document.getElementById('generateRoadmapBtn');
     const output = document.getElementById("roadmapOutput");
     const targetRole = document.getElementById("targetRole").value;
-    
-    // Save target role for the dashboard cards
-    localStorage.setItem('cn_career_target_role', targetRole); 
-    this.renderDashboard();
 
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
-    output.innerHTML = `<div class="text-indigo-600 font-semibold p-4"><i class="fas fa-robot fa-spin mr-2"></i>AI is plotting your path...</div>`;
+    output.innerHTML = `<div class="text-indigo-600 font-semibold p-4 text-center"><i class="fas fa-robot fa-spin text-3xl mb-2"></i><br>Building your ${targetRole} roadmap...</div>`;
 
     const payload = {
         currentRole: document.getElementById("currentRole").value,
@@ -2492,49 +2487,54 @@ async handleCoachFormSubmit(e) {
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "API failed");
 
-        // Use 'phases' directly as defined in your server.js
-        const roadmapSteps = data.phases || [];
-        const skillGaps = data.skills_to_learn || [];
-        const projectIdeas = data.projects || [];
-
         output.innerHTML = `
-          <div class="bg-indigo-50 border border-indigo-200 p-4 rounded-lg mb-6">
-            <h4 class="font-bold text-indigo-800 mb-1">Career Strategy</h4>
-            <p class="text-slate-700">Your personalized roadmap to becoming a ${targetRole} is ready.</p>
-          </div>
-          
-          <div class="space-y-4">
+          <div class="space-y-6">
             <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
-                <i class="fas fa-map-signs text-indigo-600"></i> Learning Path
+                <i class="fas fa-map-signs text-indigo-600"></i> Career Phases
             </h3>
-            ${roadmapSteps.map((stepText, i) => `
-              <div class="p-4 border-l-4 border-indigo-500 bg-white shadow-sm rounded-r-lg">
-                <div class="flex justify-between items-start mb-1">
-                    <h4 class="font-bold text-indigo-900">Step ${i + 1}</h4>
-                </div>
-                <p class="text-sm text-slate-700">${stepText}</p>
+            ${data.roadmap.map((item) => `
+              <div class="p-5 border-l-4 border-indigo-500 bg-white shadow-sm rounded-r-lg hover:shadow-md transition-shadow">
+                <h4 class="font-extrabold text-indigo-900 text-lg mb-2">${item.phase}</h4>
+                <p class="text-sm text-slate-700 leading-relaxed">${item.description}</p>
               </div>
             `).join("")}
           </div>
-          
+
           <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-                <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
-                    <i class="fas fa-tools text-emerald-500"></i> Skills to Master
+            <div class="bg-indigo-50 p-5 rounded-xl border border-indigo-100">
+                <h3 class="font-bold text-indigo-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-code text-indigo-600"></i> Real-World Projects
                 </h3>
-                <div class="flex flex-wrap gap-2">
-                    ${skillGaps.map(s => `<span class="bg-slate-100 text-slate-700 text-xs font-medium px-2.5 py-1 rounded-full">${s}</span>`).join("")}
+                <div class="space-y-3">
+                    ${data.real_world_projects.map(p => `
+                        <div class="bg-white p-3 rounded-lg border border-indigo-100">
+                            <strong class="text-sm text-indigo-700 block">${p.title}</strong>
+                            <p class="text-xs text-slate-600 mt-1">${p.description}</p>
+                        </div>
+                    `).join("")}
                 </div>
             </div>
             
-            <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-                <h3 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
-                    <i class="fas fa-lightbulb text-amber-500"></i> Project Ideas
+            <div class="bg-emerald-50 p-5 rounded-xl border border-emerald-100">
+                <h3 class="font-bold text-emerald-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-certificate text-emerald-600"></i> Recommended Certs
                 </h3>
-                <ul class="text-sm text-slate-600 space-y-2">
-                  ${projectIdeas.map(p => `<li class="flex items-start gap-2"><i class="fas fa-check text-indigo-400 mt-1"></i>${p}</li>`).join("")}
+                <ul class="space-y-2">
+                  ${data.suggested_certificates.map(c => `
+                    <li class="flex items-center gap-2 text-sm text-emerald-900 bg-white p-2 rounded-lg border border-emerald-100">
+                        <i class="fas fa-award text-emerald-500"></i>
+                        <span><strong>${c.name}</strong> (${c.provider})</span>
+                    </li>
+                  `).join("")}
                 </ul>
             </div>
+          </div>
+
+          <div class="mt-6 p-4 bg-amber-50 rounded-xl border border-amber-200">
+             <h4 class="font-bold text-amber-800 mb-2"><i class="fas fa-lightbulb"></i> Coach's Insider Tips</h4>
+             <ul class="text-sm text-amber-900 space-y-1">
+                ${data.pro_tips.map(tip => `<li>• ${tip}</li>`).join("")}
+             </ul>
           </div>
         `;
     } catch (err) {

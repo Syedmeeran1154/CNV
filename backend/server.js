@@ -95,21 +95,36 @@ app.post("/api/career-coach", async (req, res) => {
         }
 
         // Inside app.post("/api/career-coach", ...)
+// Inside app.post("/api/career-coach", ...)
 const prompt = `
-You are an AI Career Coach. 
-Create a career roadmap for a user moving from ${currentRole} to ${targetRole}.
+You are an expert AI Career Coach. 
+Create a highly detailed career roadmap for a user moving from ${currentRole} to ${targetRole}.
 
 STRICT JSON FORMAT:
 {
-  "phases": ["Step 1 description", "Step 2 description"],
-  "skills_to_learn": ["Skill Name 1", "Skill Name 2"],
-  "projects": ["Project Name 1", "Project Name 2"],
-  "tips": ["Tip 1", "Tip 2"]
+  "roadmap": [
+    {
+      "phase": "Phase 1: Foundation & Skill Alignment",
+      "description": "2-line detailed explanation of what to do and exactly what to learn in this stage."
+    },
+    {
+      "phase": "Phase 2: Advanced Implementation",
+      "description": "2-line detailed explanation of advanced tools and practical application steps."
+    },
+    {
+      "phase": "Phase 3: Portfolio & Career Transition",
+      "description": "2-line detailed explanation on finalizing projects and networking for the target role."
+    }
+  ],
+  "suggested_certificates": [
+    { "name": "Exact Certificate Name", "provider": "Platform (e.g. Coursera, AWS)" }
+  ],
+  "real_world_projects": [
+    { "title": "Project Name", "description": "What to build (e.g., AI-powered E-commerce)" }
+  ],
+  "pro_tips": ["Tip 1", "Tip 2"]
 }
-
-IMPORTANT: Every item in every array MUST be a simple string. Do not return objects.
 `;
-
         const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
             method: "POST",
             headers: {
