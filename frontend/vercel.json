@@ -1,0 +1,6 @@
+{
+  "routes": [
+    { "src": "/dashboard", "dest": "/dashboard.html" },
+    { "src": "/(.*)", "dest": "/$1" }
+  ]
+}
