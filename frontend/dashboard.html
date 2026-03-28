@@ -3993,11 +3993,11 @@ document.getElementById("coachForm").addEventListener("submit", async (e) => {
         };
 
         // 4. API CALL
-        const res = await fetch("/api/jd-match", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-        });
+        const res = await fetch("https://cnv-z6k7.onrender.com/api/jd-match", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+});
 
         if (!res.ok) throw new Error("Server error during analysis");
 

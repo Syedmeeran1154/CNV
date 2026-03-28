@@ -42,7 +42,13 @@ app.post("/api/resume-score", async (req, res) => {
             return res.status(400).json({ error: "No resume text provided" });
         }
 
-        const prompt = `You are an ATS Scoring Engine. Return ONLY valid JSON with keys: score (number), summary (string), strengths (array), missing_keywords (array), and suggestions (array). Resume: ${resumeText}`;
+       const prompt = `You are an expert ATS Scoring Engine. 
+Analyze the following resume and provide a realistic score. 
+IMPORTANT: The score must be a number between 60 and 90, where 60 is a basic match and 90 is a near-perfect match. 
+Return ONLY valid JSON with keys: 
+"score" (number), "summary" (string), "strengths" (array), "missing_keywords" (array), and "suggestions" (array). 
+
+Resume: ${resumeText}`;
 
         const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
             method: "POST",
