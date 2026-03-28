@@ -116,6 +116,7 @@ STRICT JSON FORMAT:
       "description": "2-line detailed explanation on finalizing projects and networking for the target role."
     }
   ],
+  "skills_to_master": ["Skill 1", "Skill 2", "Skill 3", "Skill 4", "Skill 5", "Skill 6"],
   "suggested_certificates": [
     { "name": "Exact Certificate Name", "provider": "Platform (e.g. Coursera, AWS)" }
   ],
