@@ -96,32 +96,37 @@ app.post("/api/career-coach", async (req, res) => {
 
         // Inside app.post("/api/career-coach", ...)
 // Inside app.post("/api/career-coach", ...)
+// Inside app.post("/api/career-coach", ...)
 const prompt = `
 You are an expert AI Career Coach. 
-Create a highly detailed career roadmap for a user moving from ${currentRole} to ${targetRole}.
+Create a highly detailed career roadmap for a user moving from ${currentRole} to ${targetRole} within a total timeline of ${timeline}.
+
+STRICTLY DIVIDE THE TIMELINE: 
+Break the ${timeline} into 3 logical phases. For example, if the timeline is 1 year, Phase 1 might be (Months 1-4).
+Each "phase" title MUST include the specific month range.
 
 STRICT JSON FORMAT:
 {
   "roadmap": [
     {
-      "phase": "Phase 1: Foundation & Skill Alignment",
+      "phase": "Phase 1: Foundation & Skill Alignment (Months X-Y)",
       "description": "2-line detailed explanation of what to do and exactly what to learn in this stage."
     },
     {
-      "phase": "Phase 2: Advanced Implementation",
+      "phase": "Phase 2: Advanced Implementation (Months Y-Z)",
       "description": "2-line detailed explanation of advanced tools and practical application steps."
     },
     {
-      "phase": "Phase 3: Portfolio & Career Transition",
+      "phase": "Phase 3: Portfolio & Career Transition (Months Z-End)",
       "description": "2-line detailed explanation on finalizing projects and networking for the target role."
     }
   ],
   "skills_to_master": ["Skill 1", "Skill 2", "Skill 3", "Skill 4", "Skill 5", "Skill 6"],
   "suggested_certificates": [
-    { "name": "Exact Certificate Name", "provider": "Platform (e.g. Coursera, AWS)" }
+    { "name": "Exact Certificate Name", "provider": "Platform" }
   ],
   "real_world_projects": [
-    { "title": "Project Name", "description": "What to build (e.g., AI-powered E-commerce)" }
+    { "title": "Project Name", "description": "What to build" }
   ],
   "pro_tips": ["Tip 1", "Tip 2"]
 }
