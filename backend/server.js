@@ -204,6 +204,64 @@ app.post("/api/jd-match", async (req, res) => {
     }
 });
 // ==============================
+// ✅ INTERVIEW PREP API
+// ==============================
+app.post("/api/interview-prep", async (req, res) => {
+    const GROQ_API_KEY = process.env.GROQ_API_KEY;
+
+    try {
+        const { role, company, experienceLevel, skills, interviewType, weakAreas } = req.body;
+
+        if (!role || !company || !interviewType) {
+            return res.status(400).json({ error: "Missing required fields" });
+        }
+
+        const prompt = `
+        You are an expert Interview Coach. Generate a preparation guide for:
+        Role: ${role}
+        Company: ${company}
+        Level: ${experienceLevel}
+        Interview Type: ${interviewType}
+        Skills: ${skills}
+        Weak Areas: ${weakAreas}
+
+        STRICT JSON FORMAT:
+        {
+          "company_insight": "Brief history and culture of the company.",
+          "what_they_look_for": ["Core value 1", "Technical priority 2"],
+          "repeated_questions": [
+            { "question": "Question text", "answer": "Model answer using STAR/Technical concepts" }
+          ],
+          "tips": ["Preparation tip 1", "Confidence tip 2"],
+          "confidence_advice": "A short motivational tip."
+        }`;
+
+        const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${GROQ_API_KEY}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                model: "llama-3.1-8b-instant",
+                messages: [{ role: "user", content: prompt }],
+                temperature: 0.7,
+                response_format: { type: "json_object" }
+            })
+        });
+
+        const data = await response.json();
+        if (!response.ok) return res.status(response.status).json(data);
+
+        const result = JSON.parse(data.choices[0].message.content);
+        res.json(result);
+
+    } catch (error) {
+        console.error("Interview Prep Error:", error);
+        res.status(500).json({ error: "Failed to generate interview prep" });
+    }
+});
+// ==============================
 // 🚀 START SERVER
 // ==============================
 app.listen(PORT, "0.0.0.0", () => {
