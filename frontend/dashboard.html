@@ -2493,9 +2493,15 @@ async handleCoachFormSubmit(e) {
     const output = document.getElementById("roadmapOutput");
     const targetRole = document.getElementById("targetRole").value;
 
+    // UI Loading State
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
-    output.innerHTML = `<div class="text-indigo-600 font-semibold p-4 text-center"><i class="fas fa-robot fa-spin text-3xl mb-2"></i><br>Building your ${targetRole} roadmap...</div>`;
+    output.innerHTML = `
+        <div class="flex flex-col items-center justify-center p-12 text-indigo-600">
+            <i class="fas fa-robot fa-spin text-4xl mb-3"></i>
+            <p class="font-bold">Building your ${targetRole} roadmap...</p>
+            <p class="text-xs text-slate-500">Analyzing skills and market trends</p>
+        </div>`;
 
     const payload = {
         currentRole: document.getElementById("currentRole").value,
@@ -2513,30 +2519,78 @@ async handleCoachFormSubmit(e) {
             body: JSON.stringify(payload)
         });
 
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "API failed");
+        if (!res.ok) {
+            const errorData = await res.json();
+            throw new Error(errorData.error || "API failed");
+        }
 
-        // ✅ ADD THIS: Save the target role to localStorage so the Home card can see it
+        const data = await res.json();
+
+        // ✅ PERSISTENCE: Save to localStorage for the Home Page card
         localStorage.setItem('cn_career_target_role', targetRole);
 
-        // ✅ ADD THIS: Trigger the dashboard to re-render its status cards immediately
+        // ✅ REFRESH UI: Update the status cards (Completion, Goal, etc.) immediately
         this.renderDashboard();
 
-        // The rest of your existing code to render the roadmap...
+        // Render the AI result into the roadmap container
         output.innerHTML = `
           <div class="space-y-6">
             <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
                 <i class="fas fa-map-signs text-indigo-600"></i> Career Phases
             </h3>
-            ...
+            ${data.roadmap.map((item) => `
+              <div class="p-5 border-l-4 border-indigo-500 bg-white shadow-sm rounded-r-lg hover:shadow-md transition-shadow">
+                <h4 class="font-extrabold text-indigo-900 text-lg mb-2">${item.phase}</h4>
+                <p class="text-sm text-slate-700 leading-relaxed">${item.description}</p>
+              </div>
+            `).join("")}
+          </div>
+
+          <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-indigo-50 p-5 rounded-xl border border-indigo-100">
+                <h3 class="font-bold text-indigo-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-code text-indigo-600"></i> Real-World Projects
+                </h3>
+                <div class="space-y-3">
+                    ${data.real_world_projects.map(p => `
+                        <div class="bg-white p-3 rounded-lg border border-indigo-100">
+                            <strong class="text-sm text-indigo-700 block">${p.title}</strong>
+                            <p class="text-xs text-slate-600 mt-1">${p.description}</p>
+                        </div>
+                    `).join("")}
+                </div>
+            </div>
+            
+            <div class="bg-emerald-50 p-5 rounded-xl border border-emerald-100">
+                <h3 class="font-bold text-emerald-800 mb-4 flex items-center gap-2">
+                    <i class="fas fa-award text-emerald-600"></i> Recommended Certs
+                </h3>
+                <ul class="space-y-2">
+                  ${data.suggested_certificates.map(c => `
+                    <li class="flex items-center gap-2 text-sm text-emerald-900 bg-white p-2 rounded-lg border border-emerald-100">
+                        <i class="fas fa-award text-emerald-500"></i>
+                        <span><strong>${c.name}</strong> (${c.provider})</span>
+                    </li>
+                  `).join("")}
+                </ul>
+            </div>
+          </div>
         `;
+
+        this.showNotification(`Roadmap for ${targetRole} generated!`);
+
     } catch (err) {
-        output.innerHTML = `<div class="p-4 bg-red-50 text-red-600 rounded-lg">Error: ${err.message}</div>`;
+        console.error("Coach Error:", err);
+        output.innerHTML = `
+            <div class="p-4 bg-red-50 text-red-600 rounded-lg border border-red-200">
+                <i class="fas fa-exclamation-circle mr-2"></i> Error: ${err.message}
+            </div>`;
+        this.showNotification("Failed to generate roadmap", true);
     } finally {
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-route"></i> Generate Personalized Roadmap';
     }
-}     
+}   
         renderAnalytics() {
           // Generate skill map
           const skillMap = this.skillMapper.generateSkillMap(this.skills, this.projects, this.certs, this.interns);
